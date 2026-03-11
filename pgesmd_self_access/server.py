@@ -52,6 +52,10 @@ class PgePostHandler(BaseHTTPRequestHandler):
                     f"{resource_uri[:len(self.api.utility_uri)]}"
                     f" != {self.api.utility_uri}"
                 )
+                continue
+            if resource_uri.partition('correlationID=')[2] == '000000000-b':
+                _LOGGER.debug(f'Skipping {resource_uri}')
+                continue
             resource_uris.append(resource_uri)
         
         if len(resource_uris) == 0:
