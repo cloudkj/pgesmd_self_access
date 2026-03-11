@@ -3,6 +3,7 @@
 import os
 import sys
 import logging
+import argparse
 
 from .api import SelfAccessApi
 from .server import SelfAccessServer
@@ -44,12 +45,30 @@ def download_day_data(date):
             api, save_file=save_espi_xml, filename=date, to_db=False, close_after=True
         )
 
+parser = argparse.ArgumentParser()
+parser.add_argument("third_party_id")
+parser.add_argument("client_id")
+parser.add_argument("client_secret")
+parser.add_argument("certificate_path")
+parser.add_argument("certificate_key_path")
+parser.add_argument("server_port", type=int)
+args = parser.parse_args()
 
 if __name__ == "__main__":
-    api = SelfAccessApi.auth()
-    request_post = api.request_latest_data()
+    api = SelfAccessApi(
+        args.third_party_id,
+        args.client_id,
+        args.client_secret,
+        args.certificate_path,
+        args.certificate_key_path
+    )
+
+    # Sanity check
+    api.get_service_status()
+
+    # request_post = api.request_latest_data()
 
     try:
-        server = SelfAccessServer(api, save_file=save_espi_xml)
+        server = SelfAccessServer(api, args.server_port)
     except KeyboardInterrupt:
         pass

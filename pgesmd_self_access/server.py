@@ -70,21 +70,14 @@ class SelfAccessServer:
     """Server class for PGE SMD Self Access API."""
 
     def __init__(
-        self, api_instance, save_file=None, filename=None, to_db=True, close_after=False
+        self, api_instance, port=7999, save_file=None, filename=None, to_db=True, close_after=False
     ):
         """Initialize and start the server on construction."""
         PgePostHandler.api = api_instance
         PgePostHandler.save_file = save_file
         PgePostHandler.filename = filename
         PgePostHandler.to_db = to_db
-        server = HTTPServer(("", 7999), PgePostHandler)
-
-        server.socket = ssl.wrap_socket(
-            server.socket,
-            certfile=api_instance.cert[0],
-            keyfile=api_instance.cert[1],
-            server_side=True,
-        )
+        server = HTTPServer(("", port), PgePostHandler)
 
         if close_after:
             server.handle_request()
