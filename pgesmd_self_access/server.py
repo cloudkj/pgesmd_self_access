@@ -37,36 +37,44 @@ class PgePostHandler(BaseHTTPRequestHandler):
         body = self.rfile.read(int(self.headers.get("Content-Length")))
         _LOGGER.debug(body)
         try:
-            resource_uri = ET.fromstring(body)[0].text
+            batch_list = ET.fromstring(body)
         except ET.ParseError:
             _LOGGER.error(f"Could not parse message: {body}")
             return
-        if not resource_uri[: len(self.api.utility_uri)] == self.api.utility_uri:
-            _LOGGER.error(
-                f"POST from {self.address_string} contains: "
-                f"{body}     "
-                f"{resource_uri[:len(self.api.utility_uri)]}"
-                f" != {self.api.utility_uri}"
-            )
+        
+        resource_uris = []
+        for resource_uri in batch_list:
+            if not resource_uri[: len(self.api.utility_uri)] == self.api.utility_uri:
+                _LOGGER.error(
+                    f"POST from {self.address_string} contains: "
+                    f"{body}     "
+                    f"{resource_uri[:len(self.api.utility_uri)]}"
+                    f" != {self.api.utility_uri}"
+                )
+            resource_uris.append(resource_uri)
+        
+        if len(resource_uris) == 0:
+            _LOGGER.error("No resources to process")
             return
 
         self.send_response(200)
         self.end_headers()
 
-        xml_data = self.api.get_espi_data(resource_uri)
-        for _ in parse_espi_data(xml_data):
-            _LOGGER.debug("Parsed data:", _)
+        for resource_uri in resource_uris:
+            xml_data = self.api.get_espi_data(resource_uri)
+            for _ in parse_espi_data(xml_data):
+                _LOGGER.debug(f"Parsed data: {_}")
 
-        if self.save_file:
-            save_name = self.save_file(xml_data, filename=self.filename)
-            if save_name:
-                _LOGGER.info(f"XML saved at {save_name}")
-            else:
-                _LOGGER.error("File not saved.")
+            if self.save_file:
+                save_name = self.save_file(xml_data, filename=self.filename)
+                if save_name:
+                    _LOGGER.info(f"XML saved at {save_name}")
+                else:
+                    _LOGGER.error("File not saved.")
 
-        if self.to_db:
-            _LOGGER.error("Database not implemented.")
-            pass
+            if self.to_db:
+                _LOGGER.error("Database not implemented.")
+                pass
 
 
 class SelfAccessServer:

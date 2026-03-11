@@ -66,6 +66,6 @@ if __name__ == "__main__":
     api.get_service_status()
 
     try:
-        server = SelfAccessServer(api, args.server_port)
+        server = SelfAccessServer(api, args.server_port, save_file=save_espi_xml)
     except KeyboardInterrupt:
         pass
