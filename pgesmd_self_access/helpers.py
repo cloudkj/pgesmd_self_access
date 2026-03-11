@@ -127,7 +127,7 @@ def save_espi_xml(self, xml_data, filename=None):
     if filename:
         save_name = f"{os.getcwd()}/data/espi_xml/{filename}.xml"
     else:
-        timestamp = time.strftime("%y.%m.%d %H:%M:%S", time.localtime())
+        timestamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
         save_name = f"{os.getcwd()}/data/espi_xml/{timestamp}.xml"
 
     with open(save_name, "w") as file:
