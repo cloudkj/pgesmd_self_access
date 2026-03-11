@@ -46,12 +46,12 @@ def download_day_data(date):
         )
 
 parser = argparse.ArgumentParser()
-parser.add_argument("third_party_id")
-parser.add_argument("client_id")
-parser.add_argument("client_secret")
-parser.add_argument("certificate_path")
-parser.add_argument("certificate_key_path")
-parser.add_argument("server_port", type=int)
+parser.add_argument("--third_party_id", required=True)
+parser.add_argument("--client_id", required=True)
+parser.add_argument("--client_secret", required=True)
+parser.add_argument("--certificate_path", required=True)
+parser.add_argument("--certificate_key_path", required=True)
+parser.add_argument("--server_port", type=int, required=True)
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -62,11 +62,8 @@ if __name__ == "__main__":
         args.certificate_path,
         args.certificate_key_path
     )
-
     # Sanity check
     api.get_service_status()
-
-    # request_post = api.request_latest_data()
 
     try:
         server = SelfAccessServer(api, args.server_port)

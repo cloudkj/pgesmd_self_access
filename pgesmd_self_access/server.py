@@ -54,6 +54,8 @@ class PgePostHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         xml_data = self.api.get_espi_data(resource_uri)
+        for _ in parse_espi_data(xml_data):
+            _LOGGER.debug("Parsed data:", _)
 
         if self.save_file:
             save_name = self.save_file(xml_data, filename=self.filename)
