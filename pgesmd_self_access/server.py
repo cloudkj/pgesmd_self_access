@@ -28,11 +28,6 @@ class PgePostHandler(BaseHTTPRequestHandler):
             self.end_headers()
             return
 
-        if not self.path == "/pgesmd":
-            return
-
-        _LOGGER.info(f"Received POST from {self.address_string()}")
-
         body = self.rfile.read(int(self.headers.get("Content-Length")))
         _LOGGER.debug(body)
         try:
