@@ -27,6 +27,12 @@ class PgePostHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.end_headers()
             return
+        
+        if self.path == "/refresh":
+            self.api.request_latest_data()
+            self.send_response(200)
+            self.end_headers()
+            return
 
         body = self.rfile.read(int(self.headers.get("Content-Length")))
         _LOGGER.debug(body)
