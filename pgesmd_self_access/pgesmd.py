@@ -4,6 +4,7 @@ import os
 import sys
 import logging
 import argparse
+import importlib
 
 from .api import SelfAccessApi
 from .server import SelfAccessServer
@@ -52,6 +53,7 @@ parser.add_argument("--client_secret", required=True)
 parser.add_argument("--certificate_path", required=True)
 parser.add_argument("--certificate_key_path", required=True)
 parser.add_argument("--server_port", type=int, required=True)
+parser.add_argument("--db_callback", help="Fully qualified name of function for writing parsed data to DB")
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -65,7 +67,23 @@ if __name__ == "__main__":
     # Sanity check
     api.get_service_status()
 
+    # Dynamically load DB callback function
+    to_db = None
+    if args.db_callback:
+        parts = args.db_callback.split('.')
+        module_name = '.'.join(parts[:len(parts)-1])
+        func_name = parts[len(parts)-1]
+        module = importlib.import_module(module_name)
+        func = getattr(module, func_name)
+        if callable(func):
+            to_db = func
+
     try:
-        server = SelfAccessServer(api, args.server_port, save_file=save_espi_xml)
+        server = SelfAccessServer(
+            api,
+            args.server_port,
+            save_file=save_espi_xml,
+            to_db=to_db
+        )
     except KeyboardInterrupt:
         pass

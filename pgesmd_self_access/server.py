@@ -67,7 +67,8 @@ class PgePostHandler(BaseHTTPRequestHandler):
 
         for resource_uri in resource_uris:
             xml_data = self.api.get_espi_data(resource_uri)
-            for _ in parse_espi_data(xml_data):
+            data = parse_espi_data(xml_data)
+            for _ in data:
                 _LOGGER.debug(f"Parsed data: {_}")
 
             if self.save_file:
@@ -78,15 +79,14 @@ class PgePostHandler(BaseHTTPRequestHandler):
                     _LOGGER.error("File not saved.")
 
             if self.to_db:
-                _LOGGER.error("Database not implemented.")
-                pass
+                self.to_db(data)
 
 
 class SelfAccessServer:
     """Server class for PGE SMD Self Access API."""
 
     def __init__(
-        self, api_instance, port=7999, save_file=None, filename=None, to_db=True, close_after=False
+        self, api_instance, port=7999, save_file=None, filename=None, to_db=None, close_after=False
     ):
         """Initialize and start the server on construction."""
         PgePostHandler.api = api_instance
