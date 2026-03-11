@@ -44,6 +44,7 @@ class PgePostHandler(BaseHTTPRequestHandler):
         
         resource_uris = []
         for resource_uri in batch_list:
+            resource_uri = resource_uri.text
             if not resource_uri[: len(self.api.utility_uri)] == self.api.utility_uri:
                 _LOGGER.error(
                     f"POST from {self.address_string} contains: "
