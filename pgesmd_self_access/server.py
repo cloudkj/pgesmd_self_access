@@ -29,7 +29,7 @@ class PgePostHandler(BaseHTTPRequestHandler):
         status = self.api.get_service_status()
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(str(status))
+        self.wfile.write(str(status).encode("utf-8"))
     
     def do_POST(self):
         """Download the ESPI XML and save to database."""
