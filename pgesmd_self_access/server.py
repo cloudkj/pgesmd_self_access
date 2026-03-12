@@ -80,8 +80,9 @@ class PgePostHandler(BaseHTTPRequestHandler):
                 else:
                     _LOGGER.error("File not saved.")
 
+            data = []
             try:
-                data = list(parse_espi_data(xml_data))
+                data.extend(parse_espi_data(xml_data))
                 for _ in data:
                     _LOGGER.debug(f"Parsed data: {_}")
             except Exception as e:
