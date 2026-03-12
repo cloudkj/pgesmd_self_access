@@ -35,7 +35,7 @@ class PgePostHandler(BaseHTTPRequestHandler):
             self.end_headers()
             return
 
-        if not self.path == update_path:
+        if self.path != self.update_path:
             _LOGGER.debug(f"Unhandled path {self.path}")
             return
 
