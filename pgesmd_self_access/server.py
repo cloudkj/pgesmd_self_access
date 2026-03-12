@@ -67,9 +67,6 @@ class PgePostHandler(BaseHTTPRequestHandler):
 
         for resource_uri in resource_uris:
             xml_data = self.api.get_espi_data(resource_uri)
-            data = parse_espi_data(xml_data)
-            for _ in data:
-                _LOGGER.debug(f"Parsed data: {_}")
 
             if self.save_file:
                 save_name = self.save_file(xml_data, filename=self.filename)
@@ -78,9 +75,14 @@ class PgePostHandler(BaseHTTPRequestHandler):
                 else:
                     _LOGGER.error("File not saved.")
 
-            if self.to_db:
-                self.to_db(data)
-
+            try:
+                data = list(parse_espi_data(xml_data))
+                for _ in data:
+                    _LOGGER.debug(f"Parsed data: {_}")
+                if self.to_db:
+                    self.to_db(data)
+            except Exception as e:
+                _LOGGER.error(f"Failed to parse XML: {e}")
 
 class SelfAccessServer:
     """Server class for PGE SMD Self Access API."""
