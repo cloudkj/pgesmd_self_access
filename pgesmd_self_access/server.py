@@ -19,6 +19,17 @@ class PgePostHandler(BaseHTTPRequestHandler):
     filename = None
     to_db = None
     update_path = None
+
+    def do_GET(self):
+        _LOGGER.debug(f"Received GET from {self.address_string()}")
+
+        if self.path != "/status":
+            return
+
+        status = self.api.get_service_status()
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(str(status))
     
     def do_POST(self):
         """Download the ESPI XML and save to database."""
