@@ -3,8 +3,6 @@
 import os
 import sys
 import logging
-import argparse
-import importlib
 
 from .api import SelfAccessApi
 from .server import SelfAccessServer
@@ -46,44 +44,12 @@ def download_day_data(date):
             api, save_file=save_espi_xml, filename=date, to_db=False, close_after=True
         )
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--third_party_id", required=True)
-parser.add_argument("--client_id", required=True)
-parser.add_argument("--client_secret", required=True)
-parser.add_argument("--certificate_path", required=True)
-parser.add_argument("--certificate_key_path", required=True)
-parser.add_argument("--server_port", type=int, required=True)
-parser.add_argument("--db_callback", help="Fully qualified name of function for writing parsed data to DB")
-args = parser.parse_args()
 
 if __name__ == "__main__":
-    api = SelfAccessApi(
-        args.third_party_id,
-        args.client_id,
-        args.client_secret,
-        args.certificate_path,
-        args.certificate_key_path
-    )
-    # Sanity check
-    api.get_service_status()
-
-    # Dynamically load DB callback function
-    to_db = None
-    if args.db_callback:
-        parts = args.db_callback.split('.')
-        module_name = '.'.join(parts[:len(parts)-1])
-        func_name = parts[len(parts)-1]
-        module = importlib.import_module(module_name)
-        func = getattr(module, func_name)
-        if callable(func):
-            to_db = func
+    api = SelfAccessApi.auth()
+    request_post = api.request_latest_data()
 
     try:
-        server = SelfAccessServer(
-            api,
-            args.server_port,
-            save_file=save_espi_xml,
-            to_db=to_db
-        )
+        server = SelfAccessServer(api, save_file=save_espi_xml)
     except KeyboardInterrupt:
         pass

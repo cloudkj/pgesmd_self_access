@@ -18,7 +18,8 @@ class PgePostHandler(BaseHTTPRequestHandler):
     save_file = None
     filename = None
     to_db = None
-
+    update_path = None
+    
     def do_POST(self):
         """Download the ESPI XML and save to database."""
         _LOGGER.debug(f"Received POST from {self.address_string()}")
@@ -32,6 +33,10 @@ class PgePostHandler(BaseHTTPRequestHandler):
             self.api.request_latest_data()
             self.send_response(200)
             self.end_headers()
+            return
+
+        if not self.path == update_path:
+            _LOGGER.debug(f"Unhandled path {self.path}")
             return
 
         body = self.rfile.read(int(self.headers.get("Content-Length")))
@@ -79,22 +84,33 @@ class PgePostHandler(BaseHTTPRequestHandler):
                 data = list(parse_espi_data(xml_data))
                 for _ in data:
                     _LOGGER.debug(f"Parsed data: {_}")
-                if self.to_db:
-                    self.to_db(data)
             except Exception as e:
                 _LOGGER.error(f"Failed to parse XML: {e}")
 
+            if self.to_db:
+                self.to_db(data)
+                _LOGGER.info(f"Wrote {len(data)} values to database")
+
+                
 class SelfAccessServer:
     """Server class for PGE SMD Self Access API."""
 
     def __init__(
-        self, api_instance, port=7999, save_file=None, filename=None, to_db=None, close_after=False
+        self,
+        api_instance,
+        port=7999,
+        save_file=None,
+        filename=None,
+        to_db=None,
+        close_after=False,
+        update_path="/pgesmd",
     ):
         """Initialize and start the server on construction."""
         PgePostHandler.api = api_instance
         PgePostHandler.save_file = save_file
         PgePostHandler.filename = filename
         PgePostHandler.to_db = to_db
+        PgePostHandler.update_path = update_path
         server = HTTPServer(("", port), PgePostHandler)
 
         if close_after:
