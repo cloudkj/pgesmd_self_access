@@ -103,6 +103,7 @@ class SelfAccessServer:
         filename=None,
         to_db=None,
         close_after=False,
+        use_ssl=True,
         update_path="/pgesmd",
     ):
         """Initialize and start the server on construction."""
@@ -112,6 +113,14 @@ class SelfAccessServer:
         PgePostHandler.to_db = to_db
         PgePostHandler.update_path = update_path
         server = HTTPServer(("", port), PgePostHandler)
+
+        if use_ssl:
+            server.socket = ssl.wrap_socket(
+                server.socket,
+                certfile=api_instance.cert[0],
+                keyfile=api_instance.cert[1],
+                server_side=True,
+            )
 
         if close_after:
             server.handle_request()
