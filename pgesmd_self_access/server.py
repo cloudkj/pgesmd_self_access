@@ -54,8 +54,8 @@ class PgePostHandler(BaseHTTPRequestHandler):
         _LOGGER.debug(body)
         try:
             batch_list = ET.fromstring(body)
-        except ET.ParseError:
-            _LOGGER.error(f"Could not parse message: {body}")
+        except ET.ParseError as e:
+            _LOGGER.error(f"Could not parse message: {body=} {e=}")
             return
         
         resource_uris = []
@@ -91,17 +91,8 @@ class PgePostHandler(BaseHTTPRequestHandler):
                 else:
                     _LOGGER.error("File not saved.")
 
-            data = []
-            try:
-                data.extend(parse_espi_data(xml_data))
-                for _ in data:
-                    _LOGGER.debug(f"Parsed data: {_}")
-            except Exception as e:
-                _LOGGER.error(f"Failed to parse XML: {e}")
-
             if self.to_db:
-                self.to_db(data)
-                _LOGGER.info(f"Wrote {len(data)} values to database")
+                self.to_db(xml_data)
 
                 
 class SelfAccessServer:
